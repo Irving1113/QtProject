@@ -193,10 +193,10 @@ QVector<Work> Selector::getday(QString d){       //通过日期获取当天全�
     QDateTime format_date = QDateTime::fromString(d, "yyyy-MM-dd");
     QDateTime format_date2 = format_date.addDays(1);
     QString cond1 = "begintime between datetime('" + format_date.toString("yyyy-MM-dd") + " 00:00:00') and datetime('" + format_date2.toString("yyyy-MM-dd") + " 00:00:00')";
-    QString cmd = "select name, begintime, endtime, lasttime, label, remarks from events where " + cond1 + ";";
+    QString cmd = "select name, begintime, endtime, lasttime, label, remarks from events where " + cond1 + " order by label;";
     auto retval = db.get_data(cmd, 6);
     QVector<Work> tmp;
-    for (auto line: retval) {       //返回的Work对象中仅包含事项名称、开始时刻、结束时刻和持续时间
+    for (auto line: retval) {
         Work work;
         work.name = line[0];
         work.begin_time = line[1];
