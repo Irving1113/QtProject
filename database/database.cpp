@@ -11,7 +11,7 @@ void Database::connect() {
         return;
     }
     else{
-        db.setDatabaseName("/Users/guoyifan/Desktop/timer.db");     //修改为本地.db文件的绝对路径
+        db.setDatabaseName("/Users/guoyifan/Desktop/timer_gyf.db");     //修改为本地.db文件的绝对路径
         bool success = db.open();
         if (!success){
             printf("Failed to open database.\n");
@@ -132,6 +132,45 @@ QString Selector::getdate(int n) {      //参数n表示从当前开始n天前，
     return QString(retval[0][0]);
 }
 
+QVector<QDateTime> Selector::getalldate(int n) {
+    QVector<QDateTime> v;
+    for (int i = n; i > 0; i--) {
+        QString ymd = Selector::getdate(i);
+        QDateTime format_date = QDateTime::fromString(ymd, "yyyy-MM-dd");
+        v.append(format_date);
+    }
+    return v;
+}
+
+QMap<QString, QVector<int> > Selector::datacollection(int n) {      //获取近n天中各个label的使用情况：<label, <date, last_time>>
+    QMap<QString, QVector<int> > retval;
+    for (int j = n; j > 0; j--) {
+        QVector<QPair<QString, int> > days_before = Selector::getdailystat(j);
+        for (auto line: days_before) {
+            if (retval.contains(line.first))
+                retval[line.first][n - j] = line.second;
+            else {
+                retval.insert(line.first, QVector<int>(n, 0));
+                retval[line.first][n - j] = line.second;
+            }
+
+        }
+    }
+    return retval;
+}
+
+QVector<QString> Selector::getlabels_days(int n){       //获取近n天中全部的label
+    QString date = getdate(n);      //n天前的零点
+    QString date2 = getdate(0);     //今天的零点
+    QString cond1 = "begintime between datetime('" + date + " 00:00:00') and datetime('" + date2 + " 00:00:00')";
+    QString cmd = "select distinct label from events where " + cond1 + ";";
+    auto retval = db.get_data(cmd, 1);
+    QVector<QString> tmp;
+    for (auto line: retval)
+        tmp.append(line[0]);
+    return tmp;
+}
+
 QVector<QString> Selector::getnames(int n) {        //参数n表示希望查询最近插入数据库的n个事项，返回这n个事项的名称
     QString cmd = "select distinct name from events order by begintime desc limit " + QString::number(n, 10) + ";";
     auto retval = db.get_data(cmd, 1);
@@ -147,5 +186,25 @@ QVector<QString> Selector::getlabels(int n) {       //参数n表示希望查询�
     QVector<QString> tmp;
     for (auto line: retval)
         tmp.append(line[0]);
+    return tmp;
+}
+
+QVector<Work> Selector::getday(QString d){       //通过日期获取当天全部事项
+    QDateTime format_date = QDateTime::fromString(d, "yyyy-MM-dd");
+    QDateTime format_date2 = format_date.addDays(1);
+    QString cond1 = "begintime between datetime('" + format_date.toString("yyyy-MM-dd") + " 00:00:00') and datetime('" + format_date2.toString("yyyy-MM-dd") + " 00:00:00')";
+    QString cmd = "select name, begintime, endtime, lasttime, label, remarks from events where " + cond1 + ";";
+    auto retval = db.get_data(cmd, 6);
+    QVector<Work> tmp;
+    for (auto line: retval) {       //返回的Work对象中仅包含事项名称、开始时刻、结束时刻和持续时间
+        Work work;
+        work.name = line[0];
+        work.begin_time = line[1];
+        work.end_time = line[2];
+        work.last_time = line[3].toInt();
+        work.label = line[4];
+        work.remarks = line[5];
+        tmp.append(work);
+    }
     return tmp;
 }
