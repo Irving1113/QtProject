@@ -1,4 +1,8 @@
-﻿#pragma execution_character_set("utf-8")
+/*
+ * 该文件参考了部分开源代码
+ */
+
+#pragma execution_character_set("utf-8")
 
 #include "tumbler.h"
 #include "qpainter.h"
