@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/new/prefix1">
+        <file alias="3">xiaohui.jpeg</file>
+        <file>1.png</file>
+        <file alias="4">4.png</file>
+    </qresource>
+    <qresource prefix="/">
+        <file alias="2">2.png</file>
+        <file alias="1">3.png</file>
+        <file>closeTool.svg</file>
+        <file>start2.svg</file>
+        <file>reset.svg</file>
+        <file>finish.png</file>
+    </qresource>
+</RCC>
