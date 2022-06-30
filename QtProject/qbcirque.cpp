@@ -1,3 +1,7 @@
+/*
+ * 此文件参考了部分开源代码
+ */
+
 #include "qbcirque.h"
 #include <QPainter>
 #include <QDebug>
